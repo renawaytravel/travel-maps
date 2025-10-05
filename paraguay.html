@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100%; }
+    #map { width: 100vw; height: 100vh; }
     .leaflet-container {
       background: #f9f9f9;
     }
@@ -24,22 +24,21 @@
 </head>
 <body>
   <div id="map"></div>
-
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map', {
-      center: [-23.4, -58.4], // Roughly Paraguay center
+      center: [-23.4, -58.4], // Paraguay center
       zoom: 6
     });
 
-    // --- Base Map Layer (OpenStreetMap light style)
+    // Base Layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
       maxZoom: 12
     }).addTo(map);
 
-    // --- Load Country Boundary ---
+    // Country boundary
     fetch('https://renawaytravel.github.io/travel-maps/paraguay.geojson')
       .then(res => res.json())
       .then(data => {
@@ -54,7 +53,7 @@
       })
       .catch(err => console.error('Could not load paraguay.geojson', err));
 
-    // --- Load Blog Posts (Points + Routes) ---
+    // Posts (points and lines)
     fetch('https://renawaytravel.github.io/travel-maps/paraguay-posts.geojson')
       .then(res => res.json())
       .then(data => {
@@ -74,4 +73,30 @@
               fillOpacity: 0.9
             });
           },
+          onEachFeature: function (feature, layer) {
+            if (feature.properties && feature.properties.title && feature.properties.url) {
+              const popupContent = `<a href="${feature.properties.url}" target="_blank">${feature.properties.title}</a>`;
+              layer.bindPopup(popupContent);
 
+              // Show popup on hover (for lines and points)
+              layer.on('mouseover', function () {
+                this.openPopup();
+              });
+              layer.on('mouseout', function () {
+                this.closePopup();
+              });
+
+              // For lines, also enable click to blog post
+              if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') {
+                layer.on('click', function () {
+                  window.open(feature.properties.url, '_blank');
+                });
+              }
+            }
+          }
+        }).addTo(map);
+      })
+      .catch(err => console.error('Could not load paraguay-posts.geojson', err));
+  </script>
+</body>
+</html>
