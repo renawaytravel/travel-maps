@@ -2,16 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Paraguay Travel Map</title>
+  <title>Paraguay Travel Map (Jawg Light)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100vw; height: 100vh; }
-    .leaflet-container {
-      background: #f9f9f9;
-    }
+    html, body, #map { width: 100vw; height: 100vh; margin: 0; padding: 0; }
+    .leaflet-container { background: #e5f1fa; }
     .leaflet-popup-content a {
       color: #50623A;
       text-decoration: none;
@@ -24,28 +20,35 @@
 </head>
 <body>
   <div id="map"></div>
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // Replace with your Jawg Maps token!
+    const jawgAccessToken = 'Yhp283U9TsICTYoLFaMkYtQbX1fEUxzZPp0gw5zFgs2nIj0zbPBzNYQmj8Ewp9Vc';
+
+    // Jawg Light base layer
+    var Jawg_Light = L.tileLayer(
+      'https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=' + jawgAccessToken, {
+        attribution: '<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        minZoom: 0,
+        maxZoom: 22
+      }
+    );
+
+    // Initialize map with Jawg Light
     const map = L.map('map', {
-      center: [-23.4, -58.4], // Paraguay center
-      zoom: 6
+      center: [-23.4, -58.4],
+      zoom: 6,
+      layers: [Jawg_Light]
     });
 
-    // Base Layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-      maxZoom: 12
-    }).addTo(map);
-
-    // Country boundary
+    // --- Load Paraguay boundary ---
     fetch('https://renawaytravel.github.io/travel-maps/paraguay.geojson')
       .then(res => res.json())
       .then(data => {
         const countryLayer = L.geoJSON(data, {
           style: {
-            color: '#cccccc',
-            weight: 1,
+            color: '#50623A',
+            weight: 2,
             fill: false
           }
         }).addTo(map);
@@ -53,11 +56,11 @@
       })
       .catch(err => console.error('Could not load paraguay.geojson', err));
 
-    // Posts (points and lines)
+    // --- Load Blog Posts (Points + Routes) ---
     fetch('https://renawaytravel.github.io/travel-maps/paraguay-posts.geojson')
       .then(res => res.json())
       .then(data => {
-        const postsLayer = L.geoJSON(data, {
+        L.geoJSON(data, {
           style: feature => {
             if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') {
               return { color: '#d1dece', weight: 4, opacity: 0.9 };
@@ -78,15 +81,9 @@
               const popupContent = `<a href="${feature.properties.url}" target="_blank">${feature.properties.title}</a>`;
               layer.bindPopup(popupContent);
 
-              // Show popup on hover (for lines and points)
-              layer.on('mouseover', function () {
-                this.openPopup();
-              });
-              layer.on('mouseout', function () {
-                this.closePopup();
-              });
+              layer.on('mouseover', function () { this.openPopup(); });
+              layer.on('mouseout', function () { this.closePopup(); });
 
-              // For lines, also enable click to blog post
               if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') {
                 layer.on('click', function () {
                   window.open(feature.properties.url, '_blank');
