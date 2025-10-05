@@ -40,7 +40,7 @@
     }).addTo(map);
 
     // --- Load Country Boundary ---
-    fetch('paraguay.geojson')
+    fetch('https://renawaytravel.github.io/travel-maps/paraguay.geojson')
       .then(res => res.json())
       .then(data => {
         const countryLayer = L.geoJSON(data, {
@@ -55,7 +55,7 @@
       .catch(err => console.error('Could not load paraguay.geojson', err));
 
     // --- Load Blog Posts (Points + Routes) ---
-    fetch('paraguay-posts.geojson')
+    fetch('https://renawaytravel.github.io/travel-maps/paraguay-posts.geojson')
       .then(res => res.json())
       .then(data => {
         const postsLayer = L.geoJSON(data, {
@@ -74,3 +74,4 @@
               fillOpacity: 0.9
             });
           },
+
