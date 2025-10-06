@@ -47,9 +47,9 @@
       .then(data => {
         const countryLayer = L.geoJSON(data, {
           style: {
-            color: '#50623A',
-            weight: 2,
-            fill: false
+            color: '#000000', // Border color
+            weight: 1,        // Border thickness
+            fill: false       // No fill
           }
         }).addTo(map);
         map.fitBounds(countryLayer.getBounds());
@@ -63,7 +63,7 @@
         L.geoJSON(data, {
           style: feature => {
             if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') {
-              return { color: '#d1dece', weight: 4, opacity: 0.9 };
+              return { color: '#88a483', weight: 4, opacity: 1.0 }; // Route line color
             }
           },
           pointToLayer: (feature, latlng) => {
@@ -73,7 +73,7 @@
               color: '#ffffff',
               weight: 1,
               opacity: 1,
-              fillOpacity: 0.9
+              fillOpacity: 1
             });
           },
           onEachFeature: function (feature, layer) {
